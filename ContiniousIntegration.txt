@@ -4,8 +4,8 @@ fontawesome f1d3 Master #1da1f2
 fontawesome f1d3 RC #1da1f2
 fontawesome f1d3 QA #1da1f2
 fontawesome f1d3 DEV #1da1f2
-fontawesome f1d3 FEATUTE-1 #1da1f2
-fontawesome f1d3 FEATUTE-N #1da1f2
+fontawesome f1d3 FT-1 #1da1f2
+fontawesome f1d3 FT-N #1da1f2
 fontawesome f1d3 FIX-1 #1da1f2
 fontawesome f1d3 FIX-N #1da1f2
 
@@ -14,3 +14,14 @@ fontawesome f233 COD.TEST #1da1f2
 fontawesome f233 CIP.RC #1da1f2
 fontawesome f233 CIP.QA #1da1f2
 fontawesome f233 CIP.DEV #1da1f2
+
+activate
+
+par Sprint
+thread Phase: DEVELOPING
+RC-->FT-1:New Feature Number 1 by Task of JIRA
+
+thread test
+end 
+
+deactivate 
