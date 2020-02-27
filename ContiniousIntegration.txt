@@ -8,10 +8,13 @@ fontawesome f1d3 DEV #1da1f2
 fontawesome f1d3 FEATURE #1da1f2
 fontawesome f1d3 FIX #1da1f2
 end
-fontawesome f7b1 Jira #blue
+
+participantgroup #lightgreen **Group: Actors**
+actor Jira
 actor TM_actor
 actor QA_actor
 actor Bamboo
+end 
 
 participantgroup #lightgreen **Group: ENVIRONMENT**
 fontawesome f233 CIP.DEV #1da1f2
@@ -22,8 +25,8 @@ fontawesome f233 COD.PROD #1da1f2
 end 
 
 par #ff00ff Any SPRINT
-//Phase: DEVELOPING
-thread Phase: DEVELOPING
+//Phase: BUILD
+thread Phase: BUILD
 RC-->*FEATURE:**New Feature Branch**
 FEATURE->*TM_actor:**Pull Request**
 activate FEATURE
