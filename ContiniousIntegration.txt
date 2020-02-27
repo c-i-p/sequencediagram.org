@@ -1,7 +1,5 @@
 title ContiniousIntegration
 
-actor TM
-
 participantgroup #lightgreen **Group: GIT**
 fontawesome f1d3 Master #1da1f2
 fontawesome f1d3 RC #1da1f2
@@ -10,7 +8,11 @@ fontawesome f1d3 DEV #1da1f2
 fontawesome f1d3 FEATURE #1da1f2
 fontawesome f1d3 FIX #1da1f2
 end
+fontawesome f7b1 Jira #blue
+actor TM_actor
+actor QA_actor
 actor Bamboo
+
 participantgroup #lightgreen **Group: ENVIRONMENT**
 fontawesome f233 CIP.DEV #1da1f2
 fontawesome f233 CIP.QA #1da1f2
@@ -19,18 +21,16 @@ fontawesome f233 COD.TEST #1da1f2
 fontawesome f233 COD.PROD #1da1f2
 end 
 
-fontawesome f7b1 Jira #blue
-
 par #ff00ff Any SPRINT
 //Phase: DEVELOPING
 thread Phase: DEVELOPING
 RC-->*FEATURE:**New Feature Branch**
-FEATURE->*TM:**Pull Request**
+FEATURE->*TM_actor:**Pull Request**
 activate FEATURE
-TM-->FEATURE:**Approved Pull Request**
-destroy TM
-FEATURE-->DEV:**Merge in DEV**
+TM_actor-->FEATURE:**Approved Pull Request**
+destroy TM_actor
 deactivate FEATURE
+FEATURE-->*DEV:**Merge in DEV**
 destroy FEATURE
 //alt
 alt #blue Bamboo - Feature Deploy SUCCESS
@@ -46,8 +46,9 @@ DEV->*Bamboo:GILAB Request
 note over Bamboo:Testing
 Bamboo->*Jira:**Create New BUG (stacktrace) in Jira**
 destroy Bamboo
-Jira->*FIX:**Create Fix Branch**
+Jira->*FIX:**Create New Fix Branch**
 destroy Jira
+note over FIX:Fixing...
 FIX->DEV:**Merge Fix Feature in DEV**
 note over DEV, CIP.DEV #red:**Deploy** Feature on CIP.DEV.ENV is **NOT SUCCESS**
 alt #green Bamboo - BugFix Deploy
@@ -58,15 +59,65 @@ Bamboo->*CIP.DEV:Deploy
 destroy Bamboo
 note over DEV, CIP.DEV #green:**Deploy** BugFix on CIP.DEV.ENV is **SUCCESS**
 destroy CIP.DEV
+destroy FIX
 end
 //end alt
 end 
+//Phase: TESTING
+thread Phase: TESTING
+note over DEV, CIP.DEV: **If CIP.DEV.ENV builded to...**
+DEV->*QA:**Merge in QA**
+destroy DEV
+QA->*CIP.QA:**Deploy** on CIP.QA.ENV (Analog Deploy on CIP.DEV.ENV)
+CIP.QA->*QA_actor: Starting tests
+activate CIP.QA
+//inicialize bug
+QA_actor->*Jira:New Bug's
+activate QA_actor
+Jira->*FIX:**Create New Fix Branches**
+note over FIX:Fixing...
+destroy Jira
+FIX->*DEV:**Merge Fix Feature in DEV**
+DEV->QA:**Merge Fix Feature in QA**
 
+QA->CIP.QA:**Deploy** on CIP.QA.ENV (Analog Deploy on CIP.DEV.ENV)
+destroy QA
+CIP.QA-->QA_actor: Request by BugFix
+deactivate QA_actor
+//end inicialize bug
+QA_actor-->CIP.QA:Collback (Approve or not...)
+deactivate CIP.QA
+destroy CIP.QA
 
+//Phase: PreProd
+thread Phase: PreProd
+note over RC, CIP.RC: **If CIP.QA.ENV tested to...**
 
-//Phase: DEVELOPING
-thread Phase: DEVELOPING
+DEV->*RC:**Merge in RC**
 
+RC->*CIP.RC:**Deploy** on CIP.RC.ENV (Analog Deploy on CIP.QA.ENV)
+destroy RC
+CIP.RC->QA_actor:Start Smoke Testing
+activate CIP.RC
+note over QA_actor:Smoke Testing
+QA_actor-->CIP.RC:Collback (Approve or not...)
+deactivate CIP.RC
+
+//Phase: UAT
+thread Phase: UAT
+note over Master, COD.TEST: **If CIP.RC.ENV tested to...**
+
+DEV->*Master:**Merge in Master**
+
+Master->*COD.TEST:Manual Deployment to COD.TEST.ENV
+
+note over COD.TEST: User Testing
+
+//Phase: PROD
+thread Phase: PROD
+note over Master, COD.TEST: **If COD.TEST.ENV tested to...**
+
+Master->*COD.PROD:Manual Deployment to COD.PROD.ENV
 
 end 
 
