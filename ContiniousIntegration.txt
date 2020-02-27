@@ -1,27 +1,73 @@
 title ContiniousIntegration
 
+actor TM
+
+participantgroup #lightgreen **Group: GIT**
 fontawesome f1d3 Master #1da1f2
 fontawesome f1d3 RC #1da1f2
 fontawesome f1d3 QA #1da1f2
 fontawesome f1d3 DEV #1da1f2
-fontawesome f1d3 FT-1 #1da1f2
-fontawesome f1d3 FT-N #1da1f2
-fontawesome f1d3 FIX-1 #1da1f2
-fontawesome f1d3 FIX-N #1da1f2
-
-fontawesome f233 COD.PROD #1da1f2
-fontawesome f233 COD.TEST #1da1f2
-fontawesome f233 CIP.RC #1da1f2
-fontawesome f233 CIP.QA #1da1f2
+fontawesome f1d3 FEATURE #1da1f2
+fontawesome f1d3 FIX #1da1f2
+end
+actor Bamboo
+participantgroup #lightgreen **Group: ENVIRONMENT**
 fontawesome f233 CIP.DEV #1da1f2
+fontawesome f233 CIP.QA #1da1f2
+fontawesome f233 CIP.RC #1da1f2
+fontawesome f233 COD.TEST #1da1f2
+fontawesome f233 COD.PROD #1da1f2
+end 
 
-activate
+fontawesome f7b1 Jira #blue
 
-par Sprint
+par #ff00ff Any SPRINT
+//Phase: DEVELOPING
 thread Phase: DEVELOPING
-RC-->FT-1:New Feature Number 1 by Task of JIRA
+RC-->*FEATURE:**New Feature Branch**
+FEATURE->*TM:**Pull Request**
+activate FEATURE
+TM-->FEATURE:**Approved Pull Request**
+destroy TM
+FEATURE-->DEV:**Merge in DEV**
+deactivate FEATURE
+destroy FEATURE
+//alt
+alt #blue Bamboo - Feature Deploy SUCCESS
+DEV->*Bamboo:GILAB Request
+note over Bamboo:Testing
+Bamboo->*CIP.DEV:Deploy
+destroy Bamboo
+note over DEV, CIP.DEV #green:**Deploy** Feature on CIP.DEV.ENV is **SUCCESS**
+destroy CIP.DEV
+//else alt
+else Bamboo - Feature Deploy ERROR
+DEV->*Bamboo:GILAB Request
+note over Bamboo:Testing
+Bamboo->*Jira:**Create New BUG (stacktrace) in Jira**
+destroy Bamboo
+Jira->*FIX:**Create Fix Branch**
+destroy Jira
+FIX->DEV:**Merge Fix Feature in DEV**
+note over DEV, CIP.DEV #red:**Deploy** Feature on CIP.DEV.ENV is **NOT SUCCESS**
+alt #green Bamboo - BugFix Deploy
+note over DEV, Jira: **Deploy** BugFix on CIP.DEV.ENV process...
+DEV->*Bamboo:GILAB Request
+note over Bamboo:Testing
+Bamboo->*CIP.DEV:Deploy
+destroy Bamboo
+note over DEV, CIP.DEV #green:**Deploy** BugFix on CIP.DEV.ENV is **SUCCESS**
+destroy CIP.DEV
+end
+//end alt
+end 
 
-thread test
+
+
+//Phase: DEVELOPING
+thread Phase: DEVELOPING
+
+
 end 
 
 deactivate 
